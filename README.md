@@ -27,6 +27,13 @@ pip install -r requirements.txt
 python main.py
 ```
 
+If it complains html5lib was not found, run:
+
+```
+pip install --ignore-installed six --user
+sudo -H pip install html5lib --ignore-installed
+```
+
 ## Authors
 
 * **Bruno Lopes** 
