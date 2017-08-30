@@ -60,7 +60,9 @@ def loop():
             commitRobbery(mostSafeRobbery.id)
             break
         else:
-            nightclubHash = findNightclubHash()
+            errorMsg = "Too tired, recover feature not yet implemented"
+            # nightclubHash = findNightclubHash()
+            break
     log.error("Finished helper with error: " + errorMsg)
 
 
