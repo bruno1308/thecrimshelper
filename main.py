@@ -1,5 +1,6 @@
 from nightclub import *
 from robbery import *
+from hospital import *
 from bs4 import BeautifulSoup
 import warnings
 import sys
@@ -19,7 +20,6 @@ def login():
 
     httpSession.post(constants.loginUrl, data, verify=False)
     log.log(LOG_LEVEL_SUCCESS, "Logged in successfully!")
-    constants.realCookies = httpSession.cookies
 
     page = httpSession.get(constants.baseUrl, verify=False)
     log.info("Getting home page, now logged")
@@ -29,7 +29,7 @@ def login():
 
 
 def leavePrison():
-    page = httpSession.get(constants.baseUrl+"/prison".decode('utf-8'), verify=False, cookies=constants.realCookies)
+    page = httpSession.get(constants.baseUrl+"/prison".decode('utf-8'), verify=False, cookies=httpSession.cookies)
     log.info("Getting prison page")
     parser = BeautifulSoup(page.text, "html5lib")
     playerInfo = parser.find("script", {"name": "user"}).contents[0]
@@ -37,7 +37,7 @@ def leavePrison():
     valueToBribe = parser.find("input", {"name": "bribe"}).get("value")
     if player.cash >= int(valueToBribe):
         fullURL = constants.baseUrl +"/prison/cashbribe".decode('utf-8')
-        robAnswer = httpSession.post(fullURL, "", verify=False, cookies=constants.realCookies)
+        robAnswer = httpSession.post(fullURL, "", verify=False, cookies=httpSession.cookies)
         return True
     else:
         return False
@@ -47,7 +47,12 @@ def restoreEnergy():
     nightclubUrl = findFirstFavoriteNightclubUrl()
     enterNightclub(nightclubUrl)
     consumeBestCostBenefit()
-    exitNightclub();
+    exitNightclub()
+
+
+def detox():
+    enterShop()
+    buyMethadone(findMethadoneQty())
 
 
 def loop():
@@ -55,6 +60,7 @@ def loop():
     while True:
         log.info("------------------- STARTING ACTION -------------------")
         time.sleep(config.TIME_BETWEEN_ACTIONS)
+        detox()
         if player.inPrison:
             if config.AUTO_LEAVE_PRISON:
                 left = leavePrison()
@@ -64,6 +70,8 @@ def loop():
             else:
                 errorMsg = "You were arrested"
                 break
+        if player.addiction >= config.MAX_ADDICTION:
+            detox()
         enterRobberyMenu()
         mostSafeRobbery = findMostSuccessRobbery()
         if player.stamina >= mostSafeRobbery.energy:

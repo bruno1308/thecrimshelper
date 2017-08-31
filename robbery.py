@@ -17,7 +17,6 @@ def findRobberyHash():
         parser = BeautifulSoup(page.text, "html5lib")
         action = parser.find("div", {"id": constants.robberyKey})
         action = action.parent.get("data-link")
-        log.log(LOG_LEVEL_SUCCESS, "Got robbery hash successfully!")
         log.debug("Hash is " + action)
         playerInfo = parser.find("script", {"name": "user"}).contents[0]
         player.updatePlayerWithDict(json.loads(playerInfo))
@@ -29,8 +28,7 @@ def findRobberyHash():
 def commitRobbery(robbery):
     enterRobberyMenu()
     fullURL = constants.baseUrl+lastRobberyHash+"/".decode('utf-8')+str(robbery.id).decode('utf-8')
-    robAnswer = httpSession.post(fullURL, "", verify=False, cookies=constants.realCookies)
-    constants.realCookies = httpSession.cookies
+    robAnswer = httpSession.post(fullURL, "", verify=False, cookies=httpSession.cookies)
 
     jsonResponse = json.loads(robAnswer.content)
     log.log(LOG_LEVEL_SUCCESS, "Robbed " + robbery.name + " with success! " + jsonResponse["messages"][0][0])
@@ -50,8 +48,7 @@ def enterRobberyMenu():
     try:
         log.info("Entering robbery...")
         lastRobberyHash = findRobberyHash()
-        page = httpSession.get(constants.baseUrl+lastRobberyHash, verify=False, cookies=constants.realCookies)
-        constants.realCookies = httpSession.cookies
+        page = httpSession.get(constants.baseUrl+lastRobberyHash, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(page.text, "html5lib")
         robberies = parser.find("script", {"name": constants.robberiesScriptKey}).contents[0]
         dict = json.loads(robberies)

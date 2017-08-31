@@ -9,18 +9,16 @@ import math
 log = getLogger()
 lastNightclubHash = ""
 drugs = []
-
+channelName = ""
 
 def findNightclubHash():
     try:
         log.debug("Getting nightclub hash")
-        httpSession.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"})
-        page = httpSession.get(constants.baseUrl, verify=False, cookies=constants.realCookies)
-        constants.realCookies = httpSession.cookies
+        httpSession.headers.update({"User-Agent": constants.userAgent})
+        page = httpSession.get(constants.baseUrl, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(page.text, "html5lib")
         action = parser.find(id=constants.nightclubKey)
         action = action.parent.get("data-link")
-        log.debug("Got Nightclub hash successfully!")
         log.debug("Hash is " + action)
 
         playerInfo = parser.find("script", {"name": "user"}).contents[0]
@@ -32,10 +30,20 @@ def findNightclubHash():
 
 def exitNightclub():
     httpSession.headers.update({
-                                   "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"})
+        "User-Agent": constants.userAgent,
+        "Referer": constants.baseUrl + lastNightclubHash,
+        "X-Requested-With": "XMLHttpRequest",
+        "Connection": "keep-alive",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Upgrade-Insecure-Requests": "1"
+    })
     httpSession.get(constants.baseUrl+lastNightclubHash+"/exit".decode('utf-8'), verify=False, cookies=httpSession.cookies)
     httpSession.get(constants.baseUrl, verify=False, cookies=httpSession.cookies)
     log.log(LOG_LEVEL_SUCCESS, "Left nightclub so I do not get beat up")
+    httpSession.headers = {u'X-Requested-With': None}
+    httpSession.headers = {u'Connection': None}
+    httpSession.headers = {u'Accept': 'application/json, text/plain, */*'}
 
 
 def findFirstFavoriteNightclubUrl():
@@ -48,8 +56,7 @@ def findFirstFavoriteNightclubUrl():
             "User-Agent": constants.userAgent,
             "Referer": constants.baseUrl + lastNightclubHash
         })
-        page = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=constants.realCookies)
-        constants.realCookies = httpSession.cookies
+        page = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(page.text, "html5lib")
         nightclubUrl = parser.find("input", {"value": "Entrar"}).parent.get("action")
         log.log(LOG_LEVEL_SUCCESS, "Found your favorite nightclub!")
@@ -61,27 +68,37 @@ def findFirstFavoriteNightclubUrl():
 
 
 def sendPusherAuth():
+    global channelName
     fullURL = constants.baseUrl+"/pusher/auth".decode('utf-8')
     httpSession.headers.update({
                                    "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
                                     "Referer": constants.baseUrl+lastNightclubHash,
                                     "Content-Type": "application/x-www-form-urlencoded"})
 
-    httpSession.post(fullURL, "", verify=False, cookies=constants.realCookies)
-    constants.realCookies = httpSession.cookies
+    httpSession.post(fullURL, {"socket_id": constants.fakeSocketId,
+                               "channel_name": channelName}, verify=False, cookies=httpSession.cookies)
+
+    httpSession.headers = {u'Content-Type': None}
 
 
 def getVisitors():
     httpSession.headers.update({
         "User-Agent": constants.userAgent,
-        "Referer": constants.baseUrl + lastNightclubHash
+        "Referer": constants.baseUrl + lastNightclubHash,
+        "X-Requested-With": "XMLHttpRequest",
+        "Connection": "keep-alive",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Encoding": "gzip, deflate, br"
     })
-    httpSession.get(constants.baseUrl + lastNightclubHash + "/visitors".decode("utf-8"), verify=False, cookies=constants.realCookies)
-    constants.realCookies = httpSession.cookies
+    httpSession.get(constants.baseUrl + lastNightclubHash + "/visitors".decode("utf-8"), verify=False, cookies=httpSession.cookies)
+    httpSession.headers = {u'X-Requested-With': None}
+    httpSession.headers = {u'Connection': None}
+
 
 
 def enterNightclub(nightclubUrl):
     try:
+        global channelName
         global drugs
         del drugs[:]
         fullURL = nightclubUrl
@@ -89,12 +106,21 @@ def enterNightclub(nightclubUrl):
             "User-Agent": constants.userAgent,
             "Referer": constants.baseUrl + lastNightclubHash
         })
-        httpSession.post(fullURL, "", verify=False, cookies=constants.realCookies)
-        # sendPusherAuth()
-        getVisitors()
-        pageOn = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=constants.realCookies)
-        constants.realCookies = httpSession.cookies
+        httpSession.post(fullURL, "", verify=False, cookies=httpSession.cookies)
+
+
+
+        pageOn = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(pageOn.text, "html5lib")
+
+        subscriptionHtml = parser.find("script", {"name": "subscription"})
+        subscriptionContent = subscriptionHtml.contents[0]
+        channelJson = json.loads(subscriptionContent)
+        channelName = channelJson["channel"]
+
+        sendPusherAuth()
+        getVisitors()
+
         drugsHtml = parser.find("script", {"name": "drugs"})
         drugsContent = drugsHtml.contents[0]
         drugsJson = json.loads(drugsContent)
