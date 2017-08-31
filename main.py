@@ -61,7 +61,7 @@ def loop():
     i = 0
     try:
         while True:
-            i = i +1
+            i = i + 1
             log.log(LOG_LEVEL_HEADER, "------------------- STARTING ACTION "+str(i)+" -------------------")
             time.sleep(config.TIME_BETWEEN_ACTIONS)
             if player.inPrison:

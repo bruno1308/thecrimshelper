@@ -31,7 +31,12 @@ def commitRobbery(robbery):
     robAnswer = httpSession.post(fullURL, "", verify=False, cookies=httpSession.cookies)
 
     jsonResponse = json.loads(robAnswer.content)
+    player.updatePlayerWithDict(jsonResponse["user"])
+
     log.log(LOG_LEVEL_SUCCESS, "Robbed " + robbery.name + " with success! " + jsonResponse["messages"][0][0])
+    log.log(LOG_LEVEL_SUCCESS, "Cash: " + str(player.cash) + " - Respect: " + str(player.respect)
+            + " - Strength: " + str(player.strength) + " - Resistance: " + str(player.resistance)
+            + " - Intelligence: " + str(player.intelligence) + " - Charisma: " + str(player.charisma))
 
     return robAnswer
 

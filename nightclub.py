@@ -165,6 +165,6 @@ def consumeDrug(drug, quantity):
     log.log(LOG_LEVEL_SUCCESS, "Consumed drugs! Energy should be full by now")
     responseJson = json.loads(response.content)
     player.updatePlayerWithDict(responseJson["user"])
-    log.debug("Player now has " + str(player.stamina) + "% stamina")
+    log.debug("Player now has " + str(player.stamina) + "% stamina and " + str(player.addiction) + "% of addiction")
     httpSession.headers = {u'X-Requested-With': None}
     return
