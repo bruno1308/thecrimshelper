@@ -11,31 +11,29 @@ lastRobberyHash = ""
 
 def findRobberyHash():
     try:
-        log.info("Getting robbery hash")
-        httpSession.headers.update({
-                             "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"})
-        page = httpSession.get(constants.baseUrl, verify=False, cookies=constants.realCookies)
+        log.debug("Getting robbery hash")
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"}
+        page = httpSession.get(constants.baseUrl, verify=False, cookies=httpSession.cookies, headers=headers)
         parser = BeautifulSoup(page.text, "html5lib")
-        action = parser.find(id=constants.robberyKey)
+        action = parser.find("div", {"id": constants.robberyKey})
         action = action.parent.get("data-link")
         log.log(LOG_LEVEL_SUCCESS, "Got robbery hash successfully!")
         log.debug("Hash is " + action)
         playerInfo = parser.find("script", {"name": "user"}).contents[0]
         player.updatePlayerWithDict(json.loads(playerInfo))
-        log.log(LOG_LEVEL_SUCCESS, "Update player info!")
     except Exception, e:
         log.error("Error while getting robbery hash: " + e.message)
     return action
 
 
-def commitRobbery(id):
+def commitRobbery(robbery):
     enterRobberyMenu()
-    fullURL = constants.baseUrl+lastRobberyHash+"/".decode('utf-8')+str(id).decode('utf-8')
+    fullURL = constants.baseUrl+lastRobberyHash+"/".decode('utf-8')+str(robbery.id).decode('utf-8')
     robAnswer = httpSession.post(fullURL, "", verify=False, cookies=constants.realCookies)
     constants.realCookies = httpSession.cookies
 
     jsonResponse = json.loads(robAnswer.content)
-    log.log(LOG_LEVEL_SUCCESS, "Robbery success! " + jsonResponse["messages"][0][0])
+    log.log(LOG_LEVEL_SUCCESS, "Robbed " + robbery.name + " with success! " + jsonResponse["messages"][0][0])
 
     return robAnswer
 
@@ -70,6 +68,7 @@ def commitBasicRobbery():
         updateRobberiesListWithDict(jsonResponse["singleRobberies"])
         player.updatePlayerWithDict(jsonResponse["user"])
         log.log(LOG_LEVEL_SUCCESS, "Robbery success! "+jsonResponse["messages"][0][0])
+        log.log(LOG_LEVEL_SUCCESS, "Respect now: "+str(player.respect))
     except Exception, e:
         log.error("Error while comitting robbery:" + str(e))
 
@@ -84,5 +83,6 @@ def findMostSuccessRobbery():
             continue
     if count == 0:
         count = 1
+    log.info("Most safe robbery is "+str(singleRobberies[count-1].name) + " with " + str(singleRobberies[count-1].successProb)+ "% chance of success")
     return singleRobberies[count-1]
 

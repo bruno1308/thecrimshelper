@@ -49,7 +49,6 @@ class Player:
         self.singleRobberyPower = toDict["single_robbery_power"]
         self.gangRobberyPower = toDict["gang_robbery_power"]
         self.assaultPower = toDict["assault_power"]
-        log.log(LOG_LEVEL_SUCCESS, "Updated player info!")
         return
 
     def __init__(self, username, password):

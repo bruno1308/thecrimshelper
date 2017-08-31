@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import warnings
 import sys
 from gameSession import *
+import time
 
 
 def login():
@@ -42,9 +43,18 @@ def leavePrison():
         return False
 
 
+def restoreEnergy():
+    nightclubUrl = findFirstFavoriteNightclubUrl()
+    enterNightclub(nightclubUrl)
+    consumeBestCostBenefit()
+    exitNightclub();
+
+
 def loop():
     errorMsg = "Error"
     while True:
+        log.info("------------------- STARTING ACTION -------------------")
+        time.sleep(config.TIME_BETWEEN_ACTIONS)
         if player.inPrison:
             if config.AUTO_LEAVE_PRISON:
                 left = leavePrison()
@@ -57,12 +67,11 @@ def loop():
         enterRobberyMenu()
         mostSafeRobbery = findMostSuccessRobbery()
         if player.stamina >= mostSafeRobbery.energy:
-            commitRobbery(mostSafeRobbery.id)
-            break
+            commitRobbery(mostSafeRobbery)
         else:
-            errorMsg = "Too tired, recover feature not yet implemented"
-            # nightclubHash = findNightclubHash()
-            break
+            restoreEnergy()
+        log.info("------------------- ENDING ACTION -------------------")
+
     log.error("Finished helper with error: " + errorMsg)
 
 
