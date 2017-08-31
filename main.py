@@ -7,6 +7,7 @@ import sys
 from gameSession import *
 import time
 import datetime
+import sys
 
 def login():
     httpSession.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"})
@@ -94,6 +95,9 @@ def loop():
 
 def main(argv):
     warnings.filterwarnings("ignore")
+    if len(argv) == 3:
+        player.username = argv[1]
+        player.password = argv[2]
     login()
     loop()
     log.error("Terminate program")

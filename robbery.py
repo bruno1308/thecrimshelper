@@ -85,6 +85,6 @@ def findMostSuccessRobbery():
             continue
     if count == 0:
         count = 1
-    log.info("Most safe robbery is "+str(singleRobberies[count-1].name) + " with " + str(singleRobberies[count-1].successProb)+ "% chance of success")
+    log.info("Most safe robbery is "+singleRobberies[count-1].name.encode('utf-8') + " with " + str(singleRobberies[count-1].successProb)+ "% chance of success")
     return singleRobberies[count-1]
 
