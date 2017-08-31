@@ -24,7 +24,7 @@ def enterShop():
     parser = BeautifulSoup(page.text, "html5lib")
     playerInfo = parser.find("script", {"name": "user"}).contents[0]
     player.updatePlayerWithDict(json.loads(playerInfo))
-    log.info("Player addiction: " + str(player.addiction))
+    log.info("Player addiction: " + str(player.addiction)+"%")
 
 
 
