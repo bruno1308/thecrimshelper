@@ -60,7 +60,6 @@ def loop():
     while True:
         log.info("------------------- STARTING ACTION -------------------")
         time.sleep(config.TIME_BETWEEN_ACTIONS)
-        detox()
         if player.inPrison:
             if config.AUTO_LEAVE_PRISON:
                 left = leavePrison()
