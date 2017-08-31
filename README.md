@@ -56,6 +56,12 @@ pip install -r requirements.txt
 python main.py
 ```
 
+or, if you don't wan't to put your info in config.py:
+
+```
+python main.py username password
+```
+
 If it complains html5lib was not found, run:
 
 ```
