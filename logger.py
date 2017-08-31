@@ -2,9 +2,12 @@ import logging
 from colorlog import ColoredFormatter
 
 LOG_LEVEL_SUCCESS = 123
+LOG_LEVEL_HEADER = 222
+
 def getLogger():
     """Return a logger with a default ColoredFormatter."""
     logging.addLevelName(LOG_LEVEL_SUCCESS, 'SUCCESS')
+    logging.addLevelName(LOG_LEVEL_HEADER, 'HEADER')
 
     formatter = ColoredFormatter(
         "%(log_color)s%(levelname)-8s%(reset)s %(message_log_color)s%(message)s",
@@ -14,6 +17,7 @@ def getLogger():
             'DEBUG': 'cyan',
             'INFO': 'blue',
             'SUCCESS': 'green',
+            'HEADER':'purple',
             'WARNING': 'yellow',
             'ERROR': 'red',
             'CRITICAL': 'red',
@@ -23,6 +27,7 @@ def getLogger():
                 'DEBUG': 'cyan',
                 'INFO': 'blue',
                 'SUCCESS': 'green',
+                'HEADER': 'purple',
                 'WARNING': 'yellow',
                 'ERROR': 'red',
                 'CRITICAL': 'red',

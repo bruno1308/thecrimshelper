@@ -6,7 +6,7 @@ import warnings
 import sys
 from gameSession import *
 import time
-
+import datetime
 
 def login():
     httpSession.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"})
@@ -57,29 +57,39 @@ def detox():
 
 def loop():
     errorMsg = "Error"
-    while True:
-        log.info("------------------- STARTING ACTION -------------------")
-        time.sleep(config.TIME_BETWEEN_ACTIONS)
-        if player.inPrison:
-            if config.AUTO_LEAVE_PRISON:
-                left = leavePrison()
-                if ~left:
+    startTime = datetime.datetime.now()
+    i = 0
+    try:
+        while True:
+            i = i +1
+            log.log(LOG_LEVEL_HEADER, "------------------- STARTING ACTION "+str(i)+" -------------------")
+            time.sleep(config.TIME_BETWEEN_ACTIONS)
+            if player.inPrison:
+                if config.AUTO_LEAVE_PRISON:
+                    left = leavePrison()
+                    if ~left:
+                        errorMsg = "You were arrested"
+                        break
+                else:
                     errorMsg = "You were arrested"
                     break
+            if player.addiction >= config.MAX_ADDICTION:
+                detox()
+            enterRobberyMenu()
+            mostSafeRobbery = findMostSuccessRobbery()
+            if player.stamina >= mostSafeRobbery.energy:
+                commitRobbery(mostSafeRobbery)
             else:
-                errorMsg = "You were arrested"
-                break
-        if player.addiction >= config.MAX_ADDICTION:
-            detox()
-        enterRobberyMenu()
-        mostSafeRobbery = findMostSuccessRobbery()
-        if player.stamina >= mostSafeRobbery.energy:
-            commitRobbery(mostSafeRobbery)
-        else:
-            restoreEnergy()
-        log.info("------------------- ENDING ACTION -------------------")
+                restoreEnergy()
+            log.log(LOG_LEVEL_HEADER, "------------------- ENDING ACTION "+str(i)+" -------------------")
 
-    log.error("Finished helper with error: " + errorMsg)
+        log.error("Finished helper with error: " + errorMsg)
+    except Exception, e:
+        endTime = datetime.datetime.now()
+        total = endTime - startTime
+        minutes = total.total_seconds()/float(60)
+        log.error("Program stopped because of " + str(e))
+        log.info("Program ran for " + str(minutes) + " minutes")
 
 
 def main(argv):
