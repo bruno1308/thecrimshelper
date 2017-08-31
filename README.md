@@ -25,8 +25,8 @@ What things you need to install the software
  
 ```
 MIN_SUCCESS_TO_ROBBERY = 100
-USERNAME = "jekalenga"
-PASSWORD = "2fd085a43612"
+USERNAME = ""
+PASSWORD = ""
 AUTO_LEAVE_PRISON = True
 TIME_BETWEEN_ACTIONS = 0
 MAX_ADDICTION = 3
@@ -39,6 +39,11 @@ MIN_ADDICTION = 0.5
 * TIME_BETWEEN_ACTIONS: Time between game interactions in seconds (I suggest using 2 or 3)
 * MAX_ADDICTION: Max acceptable addiction before going to hospital and restoring it to 0
 * MIN_ADDICTION: Not yet used
+
+IMPORTANT
+
+* Add a nightclub that you can join and has at least 1 drug available and put it on top of your favorite list
+
 
 ### Installing
 
