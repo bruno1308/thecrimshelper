@@ -1,6 +1,8 @@
 baseUrl = "https://www.thecrims.com"
 hospitalUrl = baseUrl + "/hospital"
-loginUrl = "https://www.thecrims.com/login"
+alleyUrl = baseUrl + "/alley"
+hookersUrl = baseUrl + "/hookers"
+loginUrl = baseUrl + "/login"
 
 nightclubKey = "menu-nightlife"
 robberyKey = "menu-robbery"

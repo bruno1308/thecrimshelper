@@ -5,6 +5,7 @@ from gameSession import *
 import json
 from drug import *
 import math
+from random import randint;
 
 log = getLogger()
 lastNightclubHash = ""
@@ -58,7 +59,11 @@ def findFirstFavoriteNightclubUrl():
         })
         page = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(page.text, "html5lib")
-        nightclubUrl = parser.find("input", {"value": "Entrar"}).parent.get("action")
+        html = parser.find("input", {"value": "Entrar"})
+        if html is None:
+            findNightclubHash()
+            return
+        nightclubUrl = html.parent.get("action")
         log.log(LOG_LEVEL_SUCCESS, "Found your favorite nightclub!")
 
         return nightclubUrl
@@ -70,6 +75,9 @@ def findFirstFavoriteNightclubUrl():
 def sendPusherAuth():
     global channelName
     fullURL = constants.baseUrl+"/pusher/auth".decode('utf-8')
+    firstPart = randint(219000, 220200)
+    secondPart = randint(5500000, 5900000)
+    constants.fakeSocketId = str(firstPart)+"."+str(secondPart)
     httpSession.headers.update({
                                    "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
                                     "Referer": constants.baseUrl+lastNightclubHash,
@@ -79,6 +87,7 @@ def sendPusherAuth():
                                "channel_name": channelName}, verify=False, cookies=httpSession.cookies)
 
     httpSession.headers = {u'Content-Type': None}
+
 
 
 def getVisitors():
@@ -114,6 +123,10 @@ def enterNightclub(nightclubUrl):
         parser = BeautifulSoup(pageOn.text, "html5lib")
 
         subscriptionHtml = parser.find("script", {"name": "subscription"})
+        if subscriptionHtml is None:
+            enterNightclub(nightclubUrl)
+            return
+
         subscriptionContent = subscriptionHtml.contents[0]
         channelJson = json.loads(subscriptionContent)
         channelName = channelJson["channel"]
@@ -148,7 +161,7 @@ def consumeBestCostBenefit():
     bestDrug = findBestCostBenefitDrug()
     quantity = float(float(100) - player.stamina)/bestDrug.stamina
     quantity = int(math.ceil(quantity))
-    log.log(LOG_LEVEL_SUCCESS, "Will buy " + str(quantity) + " of " + str(bestDrug.name))
+    log.log(LOG_LEVEL_SUCCESS, "Will buy " + str(quantity) + " of " + bestDrug.name.encode('utf-8'))
     consumeDrug(bestDrug, quantity)
 
     return
