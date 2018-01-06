@@ -59,7 +59,7 @@ def findFirstFavoriteNightclubUrl():
         })
         page = httpSession.get(constants.baseUrl+lastNightclubHash, verify=False, cookies=httpSession.cookies)
         parser = BeautifulSoup(page.text, "html5lib")
-        html = parser.find("input", {"value": "Entrar"})
+        html = parser.find("input", {"value": "Enter"})
         if html is None:
             findNightclubHash()
             return
