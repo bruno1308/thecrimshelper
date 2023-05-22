@@ -1,4 +1,4 @@
 BeautifulSoup4==4.6.0
 html5lib>0.9
 colorlog==3.0.1
-requests==2.20.0
+requests==2.31.0
